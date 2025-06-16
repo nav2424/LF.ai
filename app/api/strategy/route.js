@@ -8,49 +8,46 @@ const openai = new OpenAI({
 export async function POST(req) {
   const { skill, audience, goal, niche, timeframe } = await req.json();
 
-  console.log('✅ API INPUTS:', { skill, audience, goal, niche, timeframe });
+  console.log('✅ STRATEGY API RECEIVED:', { skill, audience, goal, niche, timeframe });
 
   if (!skill || !audience || !goal || !niche || !timeframe) {
     return NextResponse.json({ error: 'Missing input fields' }, { status: 400 });
   }
 
   const prompt = `
-You are a senior business strategist AI. A user wants to build a side hustle or business based on their current skills and goals.
+You are an AI business strategist helping users build income based on their actual skills.
 
-Their profile:
+Profile:
 - Skill: ${skill}
-- Target Audience: ${audience}
-- Niche/Industry: ${niche}
-- Monthly Income Goal: ${goal}
+- Audience: ${audience}
+- Niche: ${niche}
+- Income Goal: ${goal}
 - Timeframe: ${timeframe}
 
-🎯 Your task:
-Create a 5-step personalized business strategy. Your plan must be specific and tailored, avoiding general advice like "start a newsletter" or "create templates" unless it truly fits.
+Create a 5-step roadmap that includes:
+1. Specific product/service idea based on their skill
+2. A marketing strategy for the audience
+3. Tools/platforms they should use
+4. Realistic income path
+5. Weekly plan tied to the timeframe
 
-Respond with:
-1. The ideal product or service based on their skill
-2. A niche-specific marketing plan
-3. Relevant platforms/tools to use
-4. A revenue estimate and how to achieve it
-5. A weekly action roadmap for the given timeframe
-
-Only give grounded, user-specific suggestions that help them realistically reach their goal.
+Be ultra specific. No generic productivity tool ideas unless they match the skill/niche.
 `;
 
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'You only respond with highly specific, skill-aligned strategies. No generic fluff.' },
+        { role: 'system', content: 'You return highly specific and personalized strategies. No generic fluff.' },
         { role: 'user', content: prompt }
       ],
       temperature: 0.7
     });
 
-    const strategy = completion.choices[0]?.message?.content || '⚠️ No strategy returned.';
+    const strategy = completion.choices[0]?.message?.content || '⚠️ No strategy generated.';
     return NextResponse.json({ strategy });
   } catch (error) {
-    console.error('❌ OpenAI API error:', error);
-    return NextResponse.json({ error: 'Something went wrong generating strategy' }, { status: 500 });
+    console.error('OpenAI Error:', error);
+    return NextResponse.json({ error: 'OpenAI request failed' }, { status: 500 });
   }
 }
