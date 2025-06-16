@@ -9,71 +9,97 @@ export default function StrategyGenerator() {
   const [timeframe, setTimeframe] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function generateStrategy() {
     setLoading(true);
     setResult('');
+    setError('');
 
-    // 🔍 Debug: Show inputs being sent
-    console.log('Sending to backend:', { skill, audience, goal, niche, timeframe });
+    console.log('Sending strategy request:', { skill, audience, goal, niche, timeframe });
 
-    const response = await fetch('/api/strategy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ skill, audience, goal, niche, timeframe }) // ✅ All inputs included
-    });
+    try {
+      const response = await fetch('/api/strategy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ skill, audience, goal, niche, timeframe })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    setResult(data.strategy || '❌ Error generating strategy.');
+      if (data.strategy) {
+        setResult(data.strategy);
+      } else {
+        setError('❌ No strategy returned from the server.');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setError('❌ Failed to connect to the server.');
+    }
+
     setLoading(false);
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 space-y-4">
+    <div className="max-w-xl mx-auto p-4 space-y-4">
+      <h1 className="text-2xl font-bold text-center">LaunchFlow AI Strategy Builder</h1>
+      
       <input
+        className="w-full border p-2 rounded"
         type="text"
         placeholder="Your skill (e.g., social media marketing)"
         value={skill}
-        onChange={e => setSkill(e.target.value)}
-        className="w-full border p-2"
+        onChange={(e) => setSkill(e.target.value)}
       />
+
       <input
+        className="w-full border p-2 rounded"
         type="text"
         placeholder="Target audience (e.g., local coffee shops)"
         value={audience}
-        onChange={e => setAudience(e.target.value)}
-        className="w-full border p-2"
+        onChange={(e) => setAudience(e.target.value)}
       />
+
       <input
+        className="w-full border p-2 rounded"
         type="text"
         placeholder="Income goal (e.g., $3,000/month)"
         value={goal}
-        onChange={e => setGoal(e.target.value)}
-        className="w-full border p-2"
+        onChange={(e) => setGoal(e.target.value)}
       />
+
       <input
+        className="w-full border p-2 rounded"
         type="text"
-        placeholder="Target niche or industry (e.g., food & beverage)"
+        placeholder="Niche/Industry (e.g., food & beverage)"
         value={niche}
-        onChange={e => setNiche(e.target.value)}
-        className="w-full border p-2"
+        onChange={(e) => setNiche(e.target.value)}
       />
+
       <input
+        className="w-full border p-2 rounded"
         type="text"
-        placeholder="Timeframe to reach goal (e.g., 3 months)"
+        placeholder="Timeframe (e.g., 3 months)"
         value={timeframe}
-        onChange={e => setTimeframe(e.target.value)}
-        className="w-full border p-2"
+        onChange={(e) => setTimeframe(e.target.value)}
       />
+
       <button
         onClick={generateStrategy}
-        className="bg-black text-white px-4 py-2 w-full"
+        className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
       >
         {loading ? 'Generating...' : 'Generate Strategy'}
       </button>
 
-      <pre className="bg-gray-100 p-4 whitespace-pre-wrap">{result}</pre>
+      {result && (
+        <pre className="bg-gray-100 p-4 rounded whitespace-pre-wrap">{result}</pre>
+      )}
+
+      {error && (
+        <div className="text-red-600 font-semibold">{error}</div>
+      )}
     </div>
   );
 }

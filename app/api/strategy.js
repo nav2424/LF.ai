@@ -1,3 +1,6 @@
+console.log('STRATEGY API RECEIVED:', { skill, audience, goal, niche, timeframe });
+
+
 import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
