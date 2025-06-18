@@ -1,14 +1,8 @@
-export const metadata = {
-  title: 'Login – LaunchFlow',
-  description: 'Log in to your LaunchFlow dashboard.',
-};
-
+// app/login/layout.jsx
 export default function LoginLayout({ children }) {
   return (
-    <html lang="en">
-      <body style={{ fontFamily: 'sans-serif', padding: '2rem' }}>
-        {children}
-      </body>
-    </html>
+    <section className="bg-gray-100 min-h-screen flex items-center justify-center">
+      {children}
+    </section>
   );
 }
